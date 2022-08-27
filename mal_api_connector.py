@@ -12,6 +12,7 @@ class NVDAPIConnector:
         api_key (str or None) -- NVD API key. Default None
         """
         self.api_key = api_key
+        self.api_url = r"https://services.nvd.nist.gov/rest/json"
 
     def get_cve(self, cveID: str) -> None: # Dev Note: Change return type
         """Return information on a single CVE in JSON format.
