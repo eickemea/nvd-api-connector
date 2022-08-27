@@ -1,6 +1,5 @@
 import json
 import requests
-from dotenv import load_dotenv
 from typing import Optional
 
 class NVDAPIConnector:
@@ -29,10 +28,10 @@ class NVDAPIConnector:
         else:
             params = {"apiKey": self.api_key}
 
-        query_url = "/".join(self.api_url, query_type, api_version, cveID)
+        query_url = "/".join([self.api_url, query_type, api_version, cveID])
         response = requests.get(url = query_url, params = params)
 
-        return response
+        return response.json()
 
     def get_cves(self, startIndex: int) -> None: # Dev Note: Change return type
         """Return information on multiple CVEs in JSON format.
