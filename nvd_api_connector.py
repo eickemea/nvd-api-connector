@@ -13,20 +13,24 @@ class NVDAPIConnector:
         self.api_key = api_key
         self.api_url = r"https://services.nvd.nist.gov/rest/json"
 
-    def get_cve(self, cveID: str) -> None: # Dev Note: Change return type
+    def get_cve(self, cveID: str, addOns: bool = False) -> json:
         """Return information on a single CVE in JSON format.
         
         Keyword arguments:
         cveID (str) -- CVE ID to return information on
+        addOns (bool) -- Add official CPE names to the request if True. Default False.
         """
 
         query_type = "cve"
         api_version = "1.0"
 
-        if self.api_key is None:
-            params = None
-        else:
-            params = {"apiKey": self.api_key}
+        # Set query parameters
+        params = {}
+        if self.api_key is not None:
+            params["apiKey"] = self.api_key
+
+        if addOns:
+            params["addOns"] = "dictionaryCpes"
 
         query_url = "/".join([self.api_url, query_type, api_version, cveID])
         response = requests.get(url = query_url, params = params)
