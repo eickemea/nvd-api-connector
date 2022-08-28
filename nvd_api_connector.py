@@ -28,7 +28,6 @@ class NVDAPIConnector:
         params = {}
         if self.api_key is not None:
             params["apiKey"] = self.api_key
-
         if addOns:
             params["addOns"] = "dictionaryCpes"
 
@@ -37,14 +36,31 @@ class NVDAPIConnector:
 
         return response.json()
 
-    def get_cves(self, startIndex: int) -> None: # Dev Note: Change return type
+    def get_cves(self, startIndex: int, addOns: bool = False, resultsPerPage: int = 20) -> json:
         """Return information on multiple CVEs in JSON format.
         
         Keyword arguments:
-        startIndex (int) -- Index of first CVE in the collection returned by the response
+        startIndex (int) -- Index of first CVE in the collection returned by the response. Zero indexed.
+        addOns (bool) -- Add official CPE names to the request if True. Default False.
+        resultsPerPage (int) -- Maximum number of results to be returned. API allows maximum of 2000.
         """
 
-        return None
+        query_type = "cves"
+        api_version = "1.0"
+
+        # Set query parameters
+        params = {"startIndex": startIndex,
+                  "sortBy": "publishDate",
+                  "resultsPerPage": resultsPerPage}
+        if self.api_key is not None:
+            params["apiKey"] = self.api_key
+        if addOns:
+            params["addOns"] = "dictionaryCpes"
+
+        query_url = "/".join([self.api_url, query_type, api_version])
+        response = requests.get(url = query_url, params = params)
+
+        return response.json()
     
 
     
