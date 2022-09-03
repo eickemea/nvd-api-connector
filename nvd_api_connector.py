@@ -86,9 +86,6 @@ class NVDAPIConnector:
         with tqdm(total = totalCount) as progress_bar:
             while start_index < totalCount:
 
-                # Safety variable to break infinite loop
-                old_key_count = len(results_dict.keys())
-
                 results = self.get_cves(startIndex = start_index, addOns = False, resultsPerPage = RESULTS_PER_PAGE)
                 cve_list = results['result']["CVE_Items"]
 
@@ -96,10 +93,6 @@ class NVDAPIConnector:
                     cve_data = cve_list[i]['cve']
                     cve_id = cve_data['CVE_data_meta']['ID']
                     results_dict[cve_id] = cve_data
-                
-                if len(results_dict.keys()) == old_key_count:
-                    print("Error: Infinite Loop. CVE Retrieval Terminated.")
-                    break
 
                 start_index = start_index + RESULTS_PER_PAGE
                 
