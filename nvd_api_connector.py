@@ -2,6 +2,7 @@ import json
 import requests
 from typing import Optional
 from time import sleep
+from tqdm import tqdm
 
 class NVDAPIConnector:
 
@@ -81,26 +82,34 @@ class NVDAPIConnector:
         # Get all CVE information
         results_dict = {}
         start_index = 0
-        while start_index < totalCount:
+        print("Retrieving CVE data...")
+        with tqdm(total = totalCount) as progress_bar:
+            while start_index < totalCount:
 
-            # Safety variable to break infinite loop
-            old_key_count = len(results_dict.keys())
-    
-            results = self.get_cves(startIndex = start_index, addOns = False, resultsPerPage = RESULTS_PER_PAGE)
-            cve_list = results['result']["CVE_Items"]
+                # Safety variable to break infinite loop
+                old_key_count = len(results_dict.keys())
 
-            for i in range(0, len(cve_list)):
-                cve_data = cve_list[i]['cve']
-                cve_id = cve_data['CVE_data_meta']['ID']
-                results_dict[cve_id] = cve_data
-            
-            if len(results_dict.keys()) == old_key_count:
-                print("Error: Infinite Loop. CVE Retrieval Terminated.")
-                break
+                results = self.get_cves(startIndex = start_index, addOns = False, resultsPerPage = RESULTS_PER_PAGE)
+                cve_list = results['result']["CVE_Items"]
 
-            start_index = start_index + RESULTS_PER_PAGE
-            print("Current Number of CVEs Retrieved: " + str(len(results_dict.keys())))
-            sleep(sleep_time)
+                for i in range(0, len(cve_list)):
+                    cve_data = cve_list[i]['cve']
+                    cve_id = cve_data['CVE_data_meta']['ID']
+                    results_dict[cve_id] = cve_data
+                
+                if len(results_dict.keys()) == old_key_count:
+                    print("Error: Infinite Loop. CVE Retrieval Terminated.")
+                    break
+
+                start_index = start_index + RESULTS_PER_PAGE
+                
+                # Update progress bar
+                progress_bar.update(RESULTS_PER_PAGE)
+
+                sleep(sleep_time)
+
+            progress_bar.close()
+            print("Done.")
 
         return results_dict
 
