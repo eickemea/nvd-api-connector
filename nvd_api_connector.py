@@ -85,24 +85,25 @@ class NVDAPIConnector:
         print("Retrieving CVE data...")
         with tqdm(total = totalCount) as progress_bar:
             while start_index < totalCount:
-
+                
+                # Get CVEs from API request
                 results = self.get_cves(startIndex = start_index, addOns = False, resultsPerPage = RESULTS_PER_PAGE)
                 cve_list = results['result']["CVE_Items"]
 
+                # Add CVE data to results dictionary
                 for i in range(0, len(cve_list)):
                     cve_data = cve_list[i]['cve']
                     cve_id = cve_data['CVE_data_meta']['ID']
                     results_dict[cve_id] = cve_data
 
+                # Update progress
                 start_index = start_index + RESULTS_PER_PAGE
-                
-                # Update progress bar
                 progress_bar.update(RESULTS_PER_PAGE)
 
                 sleep(sleep_time)
 
             progress_bar.close()
-            print("Done.")
+        print("Done.")
 
         return results_dict
 
