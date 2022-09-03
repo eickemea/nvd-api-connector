@@ -15,7 +15,7 @@ class NVDAPIConnector:
         self.api_key = api_key
         self.api_url = r"https://services.nvd.nist.gov/rest/json"
 
-    def get_cve(self, cveID: str, addOns: bool = False) -> json:
+    def get_cve(self, cveID: str, addOns: bool = False) -> dict:
         """Return information on a single CVE in JSON format.
         
         Keyword arguments:
