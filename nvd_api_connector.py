@@ -1,6 +1,7 @@
 import json
 import requests
 from typing import Optional
+from time import sleep
 
 class NVDAPIConnector:
 
@@ -36,8 +37,8 @@ class NVDAPIConnector:
 
         return response.json()
 
-    def get_cves(self, startIndex: int, addOns: bool = False, resultsPerPage: int = 20) -> json:
-        """Return information on multiple CVEs in JSON format.
+    def get_cves(self, startIndex: int, addOns: bool = False, resultsPerPage: int = 20) -> dict:
+        """Return information on multiple CVEs in dictionary format.
         
         Keyword arguments:
         startIndex (int) -- Index of first CVE in the collection returned by the response. Zero indexed.
@@ -61,6 +62,46 @@ class NVDAPIConnector:
         response = requests.get(url = query_url, params = params)
 
         return response.json()
+
+    def get_all_cves(self, addOns: bool = False, sleep_time: int = 6) -> dict:
+        """Return information on all CVEs in NVD in dictionary format.
+        
+        Keyword arguments:
+        addOns (bool) -- Add official CPE names to the request if True. Default False.
+        sleep_time (int) -- Number of seconds between API calls.
+        """
+        
+        # Number of results to return from a single API call
+        RESULTS_PER_PAGE = 1000
+
+        # Get the total count of CVEs in NVD
+        initial_result = self.get_cves(startIndex = 0, addOns = False, resultsPerPage = 1)
+        totalCount = initial_result['totalResults']
+
+        # Get all CVE information
+        results_dict = {}
+        start_index = 0
+        while start_index < totalCount:
+
+            # Safety variable to break infinite loop
+            old_key_count = len(results_dict.keys())
     
+            results = self.get_cves(startIndex = start_index, addOns = False, resultsPerPage = RESULTS_PER_PAGE)
+            cve_list = results['result']["CVE_Items"]
+
+            for i in range(0, len(cve_list)):
+                cve_data = cve_list[i]['cve']
+                cve_id = cve_data['CVE_data_meta']['ID']
+                results_dict[cve_id] = cve_data
+            
+            if len(results_dict.keys()) == old_key_count:
+                print("Error: Infinite Loop. CVE Retrieval Terminated.")
+                break
+
+            start_index = start_index + RESULTS_PER_PAGE
+            print("Current Number of CVEs Retrieved: " + str(len(results_dict.keys())))
+            sleep(sleep_time)
+
+        return results_dict
 
     
